@@ -1,12 +1,22 @@
-# Étape 1 : Build avec Maven
-FROM maven:3.8.6-openjdk-11 AS builder
+# Dockerfile
+FROM openjdk:17-jdk-slim
+
+# Définir le répertoire de travail
 WORKDIR /app
-RUN git clone https://github.com/votre-utilisateur/votre-projet-java.git .
+
+# Copier les fichiers nécessaires
+COPY pom.xml .
+COPY src ./src
+
+# Installer Maven et builder l'application
+RUN apt-get update && apt-get install -y maven
 RUN mvn clean package -DskipTests
 
-# Étape 2 : Image d'exécution
-FROM openjdk:11-jre-slim
-WORKDIR /app
-COPY --from=builder /app/target/*.jar app.jar
+# Copier le JAR généré
+COPY target/*.jar app.jar
+
+# Port exposé
 EXPOSE 8080
+
+# Commande de démarrage
 ENTRYPOINT ["java", "-jar", "app.jar"]
